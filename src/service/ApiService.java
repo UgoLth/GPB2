@@ -399,39 +399,41 @@ public class ApiService {
             .addHeader("Authorization", "Bearer " + authToken)
             .build();
 
+        String responseBody = null;
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to get pensions: " + response.code());
             }
 
-            String responseBody = response.body().string();
+            responseBody = response.body().string();
             LOGGER.info("Raw response: " + responseBody);
             
-            try {
-                responseBody = responseBody
-                    .replace("\\n", "")
-                    .replace("\\r", "")
-                    .replace("\n", "")
-                    .replace("\r", "")
-                    .trim();
+            // Nettoyage éventuel des caractères parasites
+            responseBody = responseBody
+                .replace("\\n", "")
+                .replace("\\r", "")
+                .replace("\n", "")
+                .replace("\r", "")
+                .trim();
 
-                if (responseBody.startsWith("[") && responseBody.endsWith("]")) {
-                    return new Gson().fromJson(responseBody, new TypeToken<List<Pension>>(){}.getType());
-                } else {
-                    JsonObject jsonResponse = new Gson().fromJson(responseBody, JsonObject.class);
-                    if (jsonResponse.has("data")) {
-                        JsonElement dataElement = jsonResponse.get("data");
-                        if (dataElement.isJsonArray()) {
-                            return new Gson().fromJson(dataElement, new TypeToken<List<Pension>>(){}.getType());
-                        }
+            // 1. Si c'est un tableau direct
+            if (responseBody.startsWith("[") && responseBody.endsWith("]")) {
+                return new Gson().fromJson(responseBody, new TypeToken<List<Pension>>(){}.getType());
+            }
+            // 2. Si c'est un objet avec une clé "data"
+            else if (responseBody.startsWith("{") && responseBody.endsWith("}")) {
+                JsonObject jsonResponse = new Gson().fromJson(responseBody, JsonObject.class);
+                if (jsonResponse.has("data")) {
+                    JsonElement dataElement = jsonResponse.get("data");
+                    if (dataElement.isJsonArray()) {
+                        return new Gson().fromJson(dataElement, new TypeToken<List<Pension>>(){}.getType());
                     }
                 }
-                
-                throw new IOException("Format de réponse invalide");
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors du parsing de la réponse: " + responseBody, e);
-                throw new IOException("Erreur lors du parsing des données: " + e.getMessage());
             }
+            throw new IOException("Format de réponse invalide pour les pensions.");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du parsing de la réponse: " + responseBody, e);
+            throw new IOException("Erreur lors du parsing des données: " + e.getMessage());
         }
     }
 
