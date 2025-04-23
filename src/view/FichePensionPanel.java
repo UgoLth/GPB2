@@ -54,12 +54,14 @@ public class FichePensionPanel extends JPanel {
         JButton btnDelete = new JButton("Supprimer");
         JButton btnRefresh = new JButton("Actualiser");
         JButton btnHebergements = new JButton("Gérer les Hébergements");
+        JButton btnCatalogueGlobal = new JButton("Gérer le Catalogue Global");
         
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnHebergements);
+        buttonPanel.add(btnCatalogueGlobal);
         add(buttonPanel, BorderLayout.SOUTH);
 
         // Charger les pensions existantes
@@ -71,6 +73,7 @@ public class FichePensionPanel extends JPanel {
         btnDelete.addActionListener(e -> supprimerPension());
         btnRefresh.addActionListener(e -> chargerPensions());
         btnHebergements.addActionListener(e -> gererHebergements());
+        btnCatalogueGlobal.addActionListener(e -> gererCatalogueGlobal());
     }
 
     private void chargerPensions() {
@@ -233,5 +236,21 @@ public class FichePensionPanel extends JPanel {
 
         int pensionId = (int) tableModel.getValueAt(selectedRow, 0);
         mainFrame.showHebergementPanel(pensionId);
+    }
+    
+    private void gererCatalogue() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner une pension pour gérer son catalogue !");
+            return;
+        }
+
+        int pensionId = (int) tableModel.getValueAt(selectedRow, 0);
+        mainFrame.showCataloguePanel(pensionId);
+    }
+    
+    private void gererCatalogueGlobal() {
+        // Pas besoin de sélectionner une pension pour le catalogue global
+        mainFrame.showCatalogueGlobalPanel();
     }
 }

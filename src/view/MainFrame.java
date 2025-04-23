@@ -19,6 +19,8 @@ public class MainFrame extends JFrame {
     private OkHttpClient client = new OkHttpClient();
     private ProprietairePanel proprietairePanel;
     private HebergementPanel hebergementPanel;
+    private CataloguePensionPanel cataloguePensionPanel;
+    private CatalogueGlobalPanel catalogueGlobalPanel;
     private int currentPensionId;
 
     public MainFrame() {
@@ -194,6 +196,23 @@ public class MainFrame extends JFrame {
         }
         mainPanel.removeAll();
         mainPanel.add(hebergementPanel);
+        mainPanel.revalidate();
+        mainPanel.repaint();
+    }
+    
+    public void showCataloguePanel(int pensionId) {
+        this.currentPensionId = pensionId;
+        cataloguePensionPanel = new CataloguePensionPanel(this, pensionId, authToken);
+        mainPanel.removeAll();
+        mainPanel.add(cataloguePensionPanel);
+        mainPanel.revalidate();
+        mainPanel.repaint();
+    }
+    
+    public void showCatalogueGlobalPanel() {
+        catalogueGlobalPanel = new CatalogueGlobalPanel(this, authToken);
+        mainPanel.removeAll();
+        mainPanel.add(catalogueGlobalPanel);
         mainPanel.revalidate();
         mainPanel.repaint();
     }
